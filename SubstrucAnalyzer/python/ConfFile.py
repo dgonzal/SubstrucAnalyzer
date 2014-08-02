@@ -535,8 +535,19 @@ process.output = cms.OutputModule("PoolOutputModule",
     )
 )    
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
-process.source = cms.Source ("PoolSource",fileNames = ttbar_fs_File)
+
+fastsim_low = cms.untracked.vstring()
+fastsim_low.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/fast/pgun_tt_0_300.root',
+                     'file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/fast/pgun_tt_300_800.root',
+                     'file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/fast/pgun_tt_800_1500.root',
+                     'file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/fast/pgun_tt_1500_2000.root'])
+#test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/full/reco.root'])
+
+fastsim1 = cms.untracked.vstring()
+fastsim1.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/GeneratorInterface/Pythia8Interface/fast/pgun_tt.root'])
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.source = cms.Source ("PoolSource",fileNames = fastsim1)
 
 process.p = cms.Path(process.genParticlesForJets+process.ak8GenJets+process.ak8PFJets+process.ak8PFJetsConstituents+process.NSubjettinesPFJets+process.hepTopTagPFJets+process.cmsTopTagPFJets+process.cmsTopTaggerPFJets+process.demo)
 

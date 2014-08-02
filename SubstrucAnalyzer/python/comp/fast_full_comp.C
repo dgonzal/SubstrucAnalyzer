@@ -11,13 +11,16 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TLegend.h"
+#include "TGraphAsymmErrors.h"
 
 
 using namespace std;
 
 TH1F* scaled(const char *dirname, TString file, TString tag_one, TString h_entries, TString hist);
 TH1F* ratio(const char *dirname, TString file, TString tag_one, TString tag_two, TString hist1, TString hist2);
+TGraphAsymmErrors* efficiency(const char *dirname, TString file, TString tag_one, TString tag_two, TString hist1, TString hist2);
 bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type);
+bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type);
 void set_style();
 
 int main()
@@ -36,6 +39,8 @@ int main()
   TString subjet_hists[] = {"subjet_pT","subjet_phi","subjet_eta","subjet_mass"};
 
   for(unsigned int i =0; i<sizeof(tagnames)/sizeof(TString); ++i){
+    vector< TGraphAsymmErrors* > histo_effi;
+    vector< TGraphAsymmErrors* > histo_effi_matched;
     vector< TH1F* > histo_ratio;
     vector< TH1F* > histo_ratio_matched;
     vector< TH1F* > histo_jet_N;
@@ -43,17 +48,28 @@ int main()
     vector< TH1F* > histo_subjet_norm;
     for(unsigned int m =0; m<sizeof(hist)/sizeof(TString); ++m){
       for(unsigned int j =0; j<sizeof(filename)/sizeof(TString); ++j){
+	histo_effi_matched.push_back(efficiency(dirname,filename[j],tagnames[i],tagnames[i],hist_matched[m], hist_jetmatch[m]));
+	histo_effi.push_back(efficiency(dirname,filename[j],tagnames[i],tagnames[i],hist_tagged[m],hist[m]));
+
 	histo_ratio_matched.push_back(ratio(dirname,filename[j],tagnames[i],tagnames[i],hist_matched[m], hist_jetmatch[m]));
 	histo_ratio.push_back(ratio(dirname,filename[j],tagnames[i],tagnames[i],hist_tagged[m],hist[m]));
+
 	histo_jet_N.push_back(scaled(dirname,filename[j],tagnames[i],"jet_N",hist[m]));
 	histo_jet_norm.push_back(scaled(dirname,filename[j],tagnames[i],hist[m],hist[m]));
+
 	histo_subjet_norm.push_back(scaled(dirname,filename[j],tagnames[i],subjet_hists[m],subjet_hists[m]));
       }
     }
+
+    if(!plot_effi(histo_effi_matched,"plots/effi_matched_"+tagnames[i]+".eps",filename)) return 1;   
+    if(!plot_effi(histo_effi,"plots/effi_"+tagnames[i]+".eps",filename)) return 1;   
+
     if(!plot_nhists(histo_ratio_matched,"plots/ratio_matched_"+tagnames[i]+".eps",filename)) return 1;   
-    if(!plot_nhists(histo_ratio,"plots/ratio_"+tagnames[i]+".eps",filename)) return 1;   
+    if(!plot_nhists(histo_ratio,"plots/ratio_"+tagnames[i]+".eps",filename)) return 1;  
+ 
     if(!plot_nhists(histo_jet_N,"plots/jet_N_"+tagnames[i]+".eps",filename)) return 1;  
     if(!plot_nhists(histo_jet_norm,"plots/jet_norm_"+tagnames[i]+".eps",filename)) return 1;  
+
     if(!plot_nhists(histo_subjet_norm,"plots/subjet_norm_"+tagnames[i]+".eps",filename)) return 1;  
   }
 
@@ -74,7 +90,22 @@ TH1F* scaled(const char *dirname, TString file, TString tag_one, TString h_entri
 }
 
 
+TGraphAsymmErrors* efficiency(const char *dirname, TString file, TString tag_one, TString tag_two, TString hist1, TString hist2)
+{
+  TFile* f1  = new TFile(dirname+file+".root","READ");
 
+  TH1F* h1 = (TH1F*)f1->Get(tag_one+"/"+tag_one+"_"+hist1);
+  TH1F* h2 = (TH1F*)f1->Get(tag_two+"/"+tag_two+"_"+hist2);
+
+
+  //cout<<h1->GetName()<<"/"<<h2->GetName()<<dirname+file+".root" <<endl;
+
+  TGraphAsymmErrors* gr = new TGraphAsymmErrors();
+  gr->Divide(h1,h2);
+  gr->SetTitle(h1->GetTitle());
+
+  return gr;
+}
 
 TH1F* ratio(const char *dirname, TString file, TString tag_one, TString tag_two, TString hist1, TString hist2)
 {
@@ -93,6 +124,59 @@ TH1F* ratio(const char *dirname, TString file, TString tag_one, TString tag_two,
   return h1;
 }
 
+bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
+{
+  set_style();
+
+  TCanvas* can = new TCanvas("can", "can", 600, 600); 
+  can->cd();
+
+  can->Print(epsname+"[");
+  //can->SetLogy();
+  
+  TLegend * legend = new TLegend(0.7,0.8,.92,0.99);
+  legend->SetTextFont(72);
+  legend->SetTextSize(0.04);
+  legend->SetFillColor(kWhite);
+  
+  TString  histo_titel = "test";//histo[0]->GetTitle();
+  int b =0;
+ 
+
+  for(unsigned int i = 0; i<histo.size(); ++i){ 
+    cout<<histo[i]->GetTitle()<<" "<<histo_titel<<endl;
+    if(histo_titel.EqualTo(histo[i]->GetTitle())){
+      histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1.2 : 1.4*histo[i]->GetMaximum());
+      histo[i]->Draw("same");
+      histo[i]->SetLineColor(b+2);
+      legend->AddEntry(histo[i],type[b]);
+      b+=1;
+    }
+    else{
+      if (i!=0){
+      legend->Draw();
+      can->Print(epsname);
+      legend->Clear();
+      }
+      b=0;
+      histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1.2 : 1.4*histo[i]->GetMaximum());
+      histo[i]->Draw();
+      histo[i]->SetLineColor(b+2);
+      legend->AddEntry(histo[i],type[b]);
+      b+=1;
+      histo_titel=histo[i]->GetTitle();
+    }
+  }
+
+  legend->Draw();
+  can->Print(epsname);
+
+  can->Print(epsname+"]");
+  can->Close();
+  
+  return true;
+}
+
 
 bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
 {
@@ -103,7 +187,7 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
   can->cd();
 
   can->Print(epsname+"[");
-  can->SetLogy();
+  //can->SetLogy();
   
   TLegend * legend = new TLegend(0.7,0.8,.92,0.99);
   legend->SetTextFont(72);
@@ -143,8 +227,6 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
   can->Close();
   
   return true;
-
-
 }
 
 

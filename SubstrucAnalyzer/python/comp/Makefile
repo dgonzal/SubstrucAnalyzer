@@ -1,6 +1,6 @@
 # Short Makefile to compile "root macros"
 
-CXX      = g++
+CXX      = g++ -std=c++11
 LINKER   = g++ -o
 Project = fast_full_comp
 

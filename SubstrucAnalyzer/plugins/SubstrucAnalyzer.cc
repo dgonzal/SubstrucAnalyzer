@@ -1,3 +1,4 @@
+
 // -*- C++ -*-
 //
 // Package:    Substructure/SubstrucAnalyzer
@@ -142,6 +143,11 @@ SubstrucAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	      Topjet_matched_phi[icoll]->Fill(jet->phi());
 	      Topjet_matched_mass[icoll]->Fill(jet->mass());
 
+	      Top_matched_pt[icoll]->Fill( gentop[it_tops]->pt());
+	      Top_matched_eta[icoll]->Fill(gentop[it_tops]->eta());
+	      Top_matched_phi[icoll]->Fill(gentop[it_tops]->phi());
+	      Top_matched_mass[icoll]->Fill(gentop[it_tops]->mass());
+
 	      if ( basicjet != 0 ) 
 		Topsubjet_matched_N[icoll]->Fill(jet->numberOfDaughters() );
 
@@ -222,7 +228,7 @@ void SubstrucAnalyzer::beginJob(){
     name_jet_mass.append("_jet_mass");
 
     jet_N.push_back(new TH1F(name_jet_N.c_str(),"NJets",100,0,50));
-    jet_pt.push_back(new TH1F(name_jet_pt.c_str(),"Jet pT",50,0,1000));
+    jet_pt.push_back(new TH1F(name_jet_pt.c_str(),"Jet pT",100,0,2000));
     jet_eta.push_back(new TH1F(name_jet_eta.c_str(),"Jet eta",50,-7,7));
     jet_phi.push_back(new TH1F(name_jet_phi.c_str(),"Jet phi",50,-4,4));
     jet_mass.push_back(new TH1F(name_jet_mass.c_str(),"Jet mass",50,0,600));
@@ -240,7 +246,7 @@ void SubstrucAnalyzer::beginJob(){
     name_Topjet_mass.append("_Topjet_mass");
 
     Topjet_N.push_back(new TH1F(name_Topjet_N.c_str(),"NTopjets",100,0,50));
-    Topjet_pt.push_back(new TH1F(name_Topjet_pt.c_str(),"Topjet pT",50,0,1000));
+    Topjet_pt.push_back(new TH1F(name_Topjet_pt.c_str(),"Topjet pT",100,0,2000));
     Topjet_eta.push_back(new TH1F(name_Topjet_eta.c_str(),"Topjet eta",50,-7,7));
     Topjet_phi.push_back(new TH1F(name_Topjet_phi.c_str(),"Topjet phi",50,-4,4));
     Topjet_mass.push_back(new TH1F(name_Topjet_mass.c_str(),"Topjet mass",50,0,600));
@@ -258,11 +264,27 @@ void SubstrucAnalyzer::beginJob(){
     name_Topjet_matched_mass.append("_Topjet_matched_mass");
 
     Topjet_matched_N.push_back(new TH1F(name_Topjet_matched_N.c_str(),"NTopjets_Matched",100,0,50));
-    Topjet_matched_pt.push_back(new TH1F(name_Topjet_matched_pt.c_str(),"Topjet_Matched pT",50,0,1000));
+    Topjet_matched_pt.push_back(new TH1F(name_Topjet_matched_pt.c_str(),"Topjet_Matched pT",100,0,2000));
     Topjet_matched_eta.push_back(new TH1F(name_Topjet_matched_eta.c_str(),"Topjet_Matched eta",50,-7,7));
     Topjet_matched_phi.push_back(new TH1F(name_Topjet_matched_phi.c_str(),"Topjet_Matched phi",50,-4,4));
     Topjet_matched_mass.push_back(new TH1F(name_Topjet_matched_mass.c_str(),"Topjet_Matched mass",50,0,600));
     
+   
+    string name_Top_matched_pt = hname;
+    name_Top_matched_pt.append("_Top_matched_pT");
+    string name_Top_matched_eta = hname;
+    name_Top_matched_eta.append("_Top_matched_eta");
+    string name_Top_matched_phi = hname;
+    name_Top_matched_phi.append("_Top_matched_phi");
+    string name_Top_matched_mass = hname;
+    name_Top_matched_mass.append("_Top_matched_mass");
+
+    Top_matched_pt.push_back(new TH1F(name_Top_matched_pt.c_str(),"Top_Matched pT",100,0,2000));
+    Top_matched_eta.push_back(new TH1F(name_Top_matched_eta.c_str(),"Top_Matched eta",50,-7,7));
+    Top_matched_phi.push_back(new TH1F(name_Top_matched_phi.c_str(),"Top_Matched phi",50,-4,4));
+    Top_matched_mass.push_back(new TH1F(name_Top_matched_mass.c_str(),"Top_Matched mass",50,0,600));
+
+
     
     string name_Topjet_unmatched_N = hname;
     name_Topjet_unmatched_N.append("_Topjet_unmatched_N");
@@ -276,7 +298,7 @@ void SubstrucAnalyzer::beginJob(){
     name_Topjet_unmatched_mass.append("_Topjet_unmatched_mass");
 
     Topjet_unmatched_N.push_back(new TH1F(name_Topjet_unmatched_N.c_str(),"NTopjets_Unmatched",100,0,50));
-    Topjet_unmatched_pt.push_back(new TH1F(name_Topjet_unmatched_pt.c_str(),"Topjet_Unmatched pT",50,0,1000));
+    Topjet_unmatched_pt.push_back(new TH1F(name_Topjet_unmatched_pt.c_str(),"Topjet_Unmatched pT",100,0,2000));
     Topjet_unmatched_eta.push_back(new TH1F(name_Topjet_unmatched_eta.c_str(),"Topjet_Unmatched eta",50,-7,7));
     Topjet_unmatched_phi.push_back(new TH1F(name_Topjet_unmatched_phi.c_str(),"Topjet_Unmatched phi",50,-4,4));
     Topjet_unmatched_mass.push_back(new TH1F(name_Topjet_unmatched_mass.c_str(),"Topjet_Unmatched mass",50,0,600));
@@ -295,7 +317,7 @@ void SubstrucAnalyzer::beginJob(){
     name_jet_matched_mass.append("_jet_matched_mass");
 
     jet_matched_N.push_back(new TH1F(name_jet_matched_N.c_str(),"Njets_Matched",100,0,50));
-    jet_matched_pt.push_back(new TH1F(name_jet_matched_pt.c_str(),"Jet_Matched pT",50,0,1000));
+    jet_matched_pt.push_back(new TH1F(name_jet_matched_pt.c_str(),"Jet_Matched pT",100,0,2000));
     jet_matched_eta.push_back(new TH1F(name_jet_matched_eta.c_str(),"Jet_Matched eta",50,-7,7));
     jet_matched_phi.push_back(new TH1F(name_jet_matched_phi.c_str(),"Jet_Matched phi",50,-4,4));
     jet_matched_mass.push_back(new TH1F(name_jet_matched_mass.c_str(),"Jet_Matched mass",50,0,600));
@@ -312,7 +334,7 @@ void SubstrucAnalyzer::beginJob(){
     name_subjet_mass.append("_subjet_mass");
 
     subjet_N.push_back(new TH1F(name_subjet_N.c_str(),"NSubjets",100,0,50));
-    subjet_pt.push_back(new TH1F(name_subjet_pt.c_str(),"Subjet pT",50,0,1000));
+    subjet_pt.push_back(new TH1F(name_subjet_pt.c_str(),"Subjet pT",75,0,1500));
     subjet_eta.push_back(new TH1F(name_subjet_eta.c_str(),"Subjet eta",50,-7,7));
     subjet_phi.push_back(new TH1F(name_subjet_phi.c_str(),"Subjet phi",50,-4,4));
     subjet_mass.push_back(new TH1F(name_subjet_mass.c_str(),"Subjet mass",50,0,600));
@@ -329,7 +351,7 @@ void SubstrucAnalyzer::beginJob(){
     name_Topsubjet_matched_mass.append("_Topsubjet_matched_mass");
 
     Topsubjet_matched_N.push_back(new TH1F(name_Topsubjet_matched_N.c_str(),"NTopsubjet_Matcheds",100,0,50));
-    Topsubjet_matched_pt.push_back(new TH1F(name_Topsubjet_matched_pt.c_str(),"Topsubjet_Matched pT",50,0,1000));
+    Topsubjet_matched_pt.push_back(new TH1F(name_Topsubjet_matched_pt.c_str(),"Topsubjet_Matched pT",75,0,1500));
     Topsubjet_matched_eta.push_back(new TH1F(name_Topsubjet_matched_eta.c_str(),"Topsubjet_Matched eta",50,-7,7));
     Topsubjet_matched_phi.push_back(new TH1F(name_Topsubjet_matched_phi.c_str(),"Topsubjet_Matched phi",50,-4,4));
     Topsubjet_matched_mass.push_back(new TH1F(name_Topsubjet_matched_mass.c_str(),"Topsubjet_Matched mass",50,0,600));
@@ -378,6 +400,11 @@ void SubstrucAnalyzer::endJob() {
       Topjet_matched_eta[i]->Write();
       Topjet_matched_phi[i]->Write();
       Topjet_matched_mass[i]->Write();
+
+      Top_matched_pt[i]->Write();
+      Top_matched_eta[i]->Write();
+      Top_matched_phi[i]->Write();
+      Top_matched_mass[i]->Write();
      
       Topjet_unmatched_N[i]->Write();
       Topjet_unmatched_pt[i]->Write();

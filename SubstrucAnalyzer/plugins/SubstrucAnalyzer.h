@@ -120,6 +120,14 @@ private:
   std::vector<TH1F*> Topjet_matched_phi;
   std::vector<TH1F*> Topjet_matched_mass;
 
+  //Gen-Top that was matched
+  std::vector<TH1F*> Top_matched_N;
+  std::vector<TH1F*> Top_matched_pt;
+  std::vector<TH1F*> Top_matched_eta;
+  std::vector<TH1F*> Top_matched_phi;
+  std::vector<TH1F*> Top_matched_mass;
+
+
   //Subjets of the matched Topjets
   std::vector<TH1F*> Topsubjet_matched_N;
   std::vector<TH1F*> Topsubjet_matched_pt;

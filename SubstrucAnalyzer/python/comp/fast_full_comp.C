@@ -13,8 +13,11 @@
 #include "TLegend.h"
 #include "TGraphAsymmErrors.h"
 #include "TMultiGraph.h"
+#include "TLine.h"
+
 
 using namespace std;
+
 
 TH1F* plain_hist(const char *dirname, TString file, TString tag_one, TString hist1);
 TH1F* scaled(const char *dirname, TString file, TString tag_one, TString h_entries, TString hist);
@@ -50,10 +53,10 @@ int main()
 
     vector< TH1F* > histo_jet_N;
     vector< TH1F* > histo_jet_norm;
-    vector< TH1F* > histo_jet_ratio;
+    //vector< TH1F* > histo_jet_ratio;
 
     vector< TH1F* > histo_subjet_norm;
-    vector< TH1F* > histo_subjet_ratio;
+    //vector< TH1F* > histo_subjet_ratio;
 
     vector< TH1F* > histo_jet_plain;
     vector< TH1F* > histo_topjet_plain;
@@ -78,8 +81,8 @@ int main()
 
 	histo_subjet_norm.push_back(scaled(dirname,filename[j],tagnames[i],subjet_hists[m],subjet_hists[m]));
       }
-      histo_subjet_ratio.push_back(ratio_files(dirname,filename[0],filename[1],tagnames[i],subjet_hists[m]));
-      histo_jet_ratio.push_back(ratio_files(dirname,filename[0],filename[1],tagnames[i],hist[m]));
+      //histo_subjet_ratio.push_back(ratio_files(dirname,filename[0],filename[1],tagnames[i],subjet_hists[m]));
+      //histo_jet_ratio.push_back(ratio_files(dirname,filename[0],filename[1],tagnames[i],hist[m]));
     }
 
     if(!plot_nhists(histo_jet_plain,"plots/jet_plain_"+tagnames[i]+".eps",legensname)) return 1;  
@@ -94,10 +97,10 @@ int main()
  
     if(!plot_nhists(histo_jet_N,"plots/jet_N_"+tagnames[i]+".eps",legensname)) return 1;  
     if(!plot_nhists(histo_jet_norm,"plots/jet_norm_"+tagnames[i]+".eps",legensname)) return 1;  
-    if(!plot_nhists(histo_jet_ratio,"plots/jet_ratio_"+tagnames[i]+".eps",legensname)) return 1;  
+    //if(!plot_nhists(histo_jet_ratio,"plots/jet_ratio_"+tagnames[i]+".eps",legensname)) return 1;  
 
     if(!plot_nhists(histo_subjet_norm,"plots/subjet_norm_"+tagnames[i]+".eps",legensname)) return 1;  
-    if(!plot_nhists(histo_subjet_ratio,"plots/subjet_ratio_"+tagnames[i]+".eps",legensname)) return 1;  
+    //if(!plot_nhists(histo_subjet_ratio,"plots/subjet_ratio_"+tagnames[i]+".eps",legensname)) return 1;  
 
   }
 
@@ -228,68 +231,80 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
 
   set_style();
 
-  TCanvas* can = new TCanvas("can", "can", 600, 600); 
+  TCanvas* can = new TCanvas("can", "can", 600, 700); 
   can->cd();
-
   can->Print(epsname+"[");
   //can->SetLogy();
   
-  TLegend * legend = new TLegend(0.7,0.8,.92,0.99);
-  legend->SetTextFont(72);
-  legend->SetTextSize(0.04);
-  legend->SetFillColor(kWhite);
-  
-  TString  histo_titel = histo[0]->GetTitle();
-  int b =0;
 
 
-  TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
-  pad1->SetBottomMargin(0);
-  pad1->Draw();
-  pad1->cd();
-  h1->DrawCopy();
-  h2->Draw("same");
-  c1->cd();
-  TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.3);
-  pad2->SetTopMargin(0);
-  pad2->Draw();
-  pad2->cd();
-  h1->Sumw2();
-  h1->SetStats(0);
-  h1->Divide(h2);
-  h1->SetMarkerStyle(21);
-  h1->Draw("ep");
-
-  for(unsigned int i = 0; i<histo.size(); ++i){
+  for(unsigned int i = 0; i<histo.size(); i+=2){
     //if(histo_titel=="Topjet_pT" ||histo_titel=="Topjet_matched_pT" ){
-    //histo[i]->Rebin(2);
+    histo[i]->Rebin(5);
+    histo[i+1]->Rebin(5);
     //histo[i]->Scale(0.2);
     //}
-    if(histo_titel==histo[i]->GetTitle()){
-      //histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1. : 1.4*histo[i]->GetMaximum());
-      histo[i]->SetMaximum(1.4*histo[i]->GetMaximum());
-      histo[i]->Draw("same");
-      //histo[i]->SetLineColor(b+2);
-      legend->AddEntry(histo[i],type[b]);
-      b+=1;
-    }
-    else{
-      legend->Draw();
-      can->Print(epsname);
-      legend->Clear();
-      b=0;
-      //histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1. : 1.4*histo[i]->GetMaximum());
-      histo[i]->SetMaximum(1.4*histo[i]->GetMaximum());
-      histo[i]->Draw();
-      //histo[i]->SetLineColor(b+2);
-      legend->AddEntry(histo[i],type[b]);
-      b+=1;
-      histo_titel=histo[i]->GetTitle();
-    }
-  }
+    //cout<<i<<"/"<<histo.size() <<endl;
+    //cout<<histo[i]->GetTitle()<< " "<< histo[i+1]->GetTitle()<<endl;
 
-  legend->Draw();
-  can->Print(epsname);
+    TLegend * legend = new TLegend(0.7,0.8,.92,0.99);
+    legend->SetTextFont(72);
+    legend->SetTextSize(0.04);
+    legend->SetFillColor(kWhite);
+
+    TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
+    pad1->SetBottomMargin(0.05);
+    pad1->Draw();
+    TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.3);
+    pad2->SetTopMargin(0.05);
+   
+    pad2->Draw();
+
+    pad1->cd();
+    /*
+    histo[i]->GetXaxis()->SetLabelFont(63); //font in pixels
+    histo[i]->GetXaxis()->SetLabelSize(16); //in pixels
+    histo[i]->GetYaxis()->SetLabelFont(63); //font in pixels
+    histo[i]->GetYaxis()->SetLabelSize(16); //in pixels
+    */
+
+    histo[i]->SetMaximum(1.4*histo[i]->GetMaximum());
+    histo[i]->SetLineColor(kRed);
+    histo[i+1]->SetLineColor(kGreen);
+    histo[i]->Draw();
+    histo[i+1]->Draw("same");
+
+    legend->AddEntry(histo[i],type[0]);
+    legend->AddEntry(histo[i+1],type[1]);
+    legend->Draw();
+    //can->cd();
+
+    
+    
+    pad2->cd();
+
+    TH1F *hnew = (TH1F*)histo[i]->Clone("help_hist");
+    hnew->SetLabelSize(0.07,"Y");
+    hnew->SetLabelSize(0.00,"X");
+    hnew->Sumw2();
+    hnew->SetMaximum(1.3);
+    hnew->SetStats(0);
+    hnew->Divide(histo[i+1]);
+    hnew->SetMarkerStyle(21);
+
+    //TLine* line = new TLine(histo[i]->GetXaxis()->GetXmin,0,histo[i]->GetXaxis()->GetXmax,0); 
+    TLine* line = new TLine(0,1,2000,1); 
+
+    hnew->Draw("ep");
+    line->Draw();
+    can->cd();
+    
+    can->Print(epsname);
+    //can->Flush();
+    //pad1->Close();
+    //pad2->Close();
+
+ }
 
   can->Print(epsname+"]");
   can->Close();
@@ -306,7 +321,8 @@ void set_style()
   gStyle->SetOptStat(0);
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
-  
+  gStyle->SetOptTitle(0); 
+
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadColor(kWhite);
   gStyle->SetPadGridX(false);

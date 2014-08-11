@@ -32,7 +32,7 @@ int main()
 {
   //TString Folder[] = {"SVecQ_Selection_0Lepton/","SVecQ_Selection_1Lepton/","SVecQ_Selection_2Lepton/","SVecQ_Selection_3Lepton/"};
 
-  const char *dirname="/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_1_0_pre9/src/Substructure/SubstrucAnalyzer/python/";
+  const char *dirname="~/git_project/SubstrucAnalyzer/SubstrucAnalyzer/python/";
 
   TString filename[] = {"fast_sim_flat","full_sim_flat"};
   TString legensname[] = {"Fast Sim","Full Sim"};
@@ -127,7 +127,10 @@ TGraphAsymmErrors* efficiency(const char *dirname, TString file, TString tag_one
 
   TH1F* h1 = (TH1F*)f1->Get(tag_one+"/"+tag_one+"_"+hist1);
   TH1F* h2 = (TH1F*)f1->Get(tag_two+"/"+tag_two+"_"+hist2);
+  
 
+  h1->Rebin(5);
+  h2->Rebin(5);
 
   //cout<<h1->GetName()<<"/"<<h2->GetName()<<dirname+file+".root" <<endl;
 
@@ -193,8 +196,6 @@ bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
   can->Print(epsname+"[");
   //can->SetLogy();
   
- 
-
   for(unsigned int n = 0; n<histo.size()/2; ++n){ 
     TMultiGraph *mg = new TMultiGraph();
     int jumper = n *2;
@@ -210,12 +211,13 @@ bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
       if(histo_titel.EqualTo(histo[i]->GetTitle())){
 	histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1. : 1.4*histo[i]->GetMaximum());
 	histo[i]->SetLineColor(b+2);
-	legend->AddEntry(histo[i],type[b]);
+	legend->AddEntry(histo[i],type[b],"l");
 	mg->Add(histo[i]);
 	++b;
       }
     }
-    mg->Draw("alp");
+    //mg->SetLableSize(0.05);
+    mg->Draw("ap");
     legend->Draw();
     can->Print(epsname);
   }
@@ -242,7 +244,9 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
     //if(histo_titel=="Topjet_pT" ||histo_titel=="Topjet_matched_pT" ){
     histo[i]->Rebin(5);
     histo[i+1]->Rebin(5);
-    //histo[i]->Scale(0.2);
+    histo[i]->Scale(0.2);
+    histo[i+1]->Scale(0.2);
+
     //}
     //cout<<i<<"/"<<histo.size() <<endl;
     //cout<<histo[i]->GetTitle()<< " "<< histo[i+1]->GetTitle()<<endl;
@@ -287,15 +291,18 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
     hnew->SetLabelSize(0.07,"Y");
     hnew->SetLabelSize(0.00,"X");
     hnew->Sumw2();
-    hnew->SetMaximum(1.3);
+    hnew->SetMaximum(1.5);
+    hnew->SetMinimum(.5);
     hnew->SetStats(0);
     hnew->Divide(histo[i+1]);
     hnew->SetMarkerStyle(21);
 
     //TLine* line = new TLine(histo[i]->GetXaxis()->GetXmin,0,histo[i]->GetXaxis()->GetXmax,0); 
-    TLine* line = new TLine(0,1,2000,1); 
+    TLine* line = new TLine(hnew->GetXaxis()->GetXmin(),1,hnew->GetXaxis()->GetXmax(),1); 
 
-    hnew->Draw("ep");
+    //cout<<hnew->GetXaxis()->GetXmax()<<endl;
+
+    hnew->Draw("HISTp");
     line->Draw();
     can->cd();
     

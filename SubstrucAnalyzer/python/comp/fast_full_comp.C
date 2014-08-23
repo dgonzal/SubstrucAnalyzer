@@ -67,7 +67,7 @@ int main()
       for(unsigned int j =0; j<sizeof(filename)/sizeof(TString); ++j){
 
 	histo_jet_plain.push_back(plain_hist(dirname,filename[j],tagnames[i],hist[m]));
-	histo_topjet_plain.push_back(plain_hist(dirname,filename[j],tagnames[i],hist_matched[m]));
+	histo_topjet_plain.push_back(plain_hist(dirname,filename[j],tagnames[i],hist_tagged[m]));
 	histo_subjet_plain.push_back(plain_hist(dirname,filename[j],tagnames[i],subjet_hists[m]));
 
 	histo_effi_matched.push_back(efficiency(dirname,filename[j],tagnames[i],tagnames[i],hist_matched[m], hist_jetmatch[m]));
@@ -129,13 +129,13 @@ TGraphAsymmErrors* efficiency(const char *dirname, TString file, TString tag_one
   TH1F* h2 = (TH1F*)f1->Get(tag_two+"/"+tag_two+"_"+hist2);
   
 
-  h1->Rebin(5);
-  h2->Rebin(5);
+  //h1->Rebin(5);
+  //h2->Rebin(5);
 
   //cout<<h1->GetName()<<"/"<<h2->GetName()<<dirname+file+".root" <<endl;
 
   TGraphAsymmErrors* gr = new TGraphAsymmErrors();
-  gr->Divide(h1,h2);
+  gr->BayesDivide(h1,h2);
   gr->SetTitle(h1->GetTitle());
 
   return gr;
@@ -190,7 +190,7 @@ bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
 {
   set_style();
 
-  TCanvas* can = new TCanvas("can", "can", 600, 600); 
+  TCanvas* can = new TCanvas("can", "can", 600, 700); 
   can->cd();
 
   can->Print(epsname+"[");
@@ -200,13 +200,34 @@ bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
     TMultiGraph *mg = new TMultiGraph();
     int jumper = n *2;
     int b = 0;
-    TString  histo_titel = histo[jumper]->GetTitle();
+    //TString  histo_titel = histo[jumper]->GetTitle();
     
     TLegend * legend = new TLegend(0.7,0.8,.92,0.99);
     legend->SetTextFont(72);
     legend->SetTextSize(0.04);
     legend->SetFillColor(kWhite);
 
+    TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
+    pad1->SetBottomMargin(0.05);
+    //pad1->SetLogy();
+    pad1->Draw();
+    TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.3);
+    pad2->SetTopMargin(0.05);
+    
+    pad2->Draw();
+    
+    pad1->cd();
+
+    //histo[jumper]->SetMaximum(0.5);
+    histo[jumper]->SetLineColor(2);
+    legend->AddEntry(histo[jumper],type[0],"l");
+    mg->Add(histo[jumper]);
+    //histo[jumper+1]->SetMaximum(0.5);
+    histo[jumper+1]->SetLineColor(3);
+    legend->AddEntry(histo[jumper+1],type[1],"l");
+    mg->Add(histo[jumper+1]);
+
+    /*
     for(unsigned int i = 0; i<histo.size(); ++i){ 
       if(histo_titel.EqualTo(histo[i]->GetTitle())){
 	histo[i]->SetMaximum(histo[i]->GetMaximum()<1 ? 1. : 1.4*histo[i]->GetMaximum());
@@ -216,9 +237,36 @@ bool plot_effi(vector<TGraphAsymmErrors*> histo, TString epsname, TString* type)
 	++b;
       }
     }
+    */
     //mg->SetLableSize(0.05);
     mg->Draw("ap");
     legend->Draw();
+    /*
+    pad2->cd();
+
+    TGraphAsymmErrors *hnew = (TGraphAsymmErrors*)histo[jumper]->Clone("help_hist");
+    //hnew->SetLabelSize(0.07,"Y");
+    //hnew->SetLabelSize(0.00,"X");
+    //hnew->Sumw2();
+    hnew->SetMaximum(1.5);
+    hnew->SetMinimum(.5);
+    //hnew->SetStats(0);
+    hnew->Divide(hnew,histo[jumper+1]);
+    hnew->SetMarkerStyle(21);
+
+    hnew->SetTitle("sdsd");
+
+    //TLine* line = new TLine(histo[i]->GetXaxis()->GetXmin,0,histo[i]->GetXaxis()->GetXmax,0); 
+    TLine* line = new TLine(hnew->GetXaxis()->GetXmin(),1,hnew->GetXaxis()->GetXmax(),1); 
+
+    //cout<<hnew->GetXaxis()->GetXmax()<<endl;
+
+    hnew->Draw("HISTp");
+    line->Draw();
+    */
+    can->cd();
+
+
     can->Print(epsname);
   }
   can->Print(epsname+"]");
@@ -244,8 +292,8 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
     //if(histo_titel=="Topjet_pT" ||histo_titel=="Topjet_matched_pT" ){
     histo[i]->Rebin(5);
     histo[i+1]->Rebin(5);
-    histo[i]->Scale(0.2);
-    histo[i+1]->Scale(0.2);
+    //histo[i]->Scale(0.2);
+    //histo[i+1]->Scale(0.2);
 
     //}
     //cout<<i<<"/"<<histo.size() <<endl;
@@ -258,6 +306,7 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
 
     TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
     pad1->SetBottomMargin(0.05);
+    //pad1->SetLogy();
     pad1->Draw();
     TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.3);
     pad2->SetTopMargin(0.05);
@@ -296,6 +345,8 @@ bool plot_nhists(vector<TH1F*> histo, TString epsname, TString* type)
     hnew->SetStats(0);
     hnew->Divide(histo[i+1]);
     hnew->SetMarkerStyle(21);
+
+    hnew->SetTitle("sdsd");
 
     //TLine* line = new TLine(histo[i]->GetXaxis()->GetXmin,0,histo[i]->GetXaxis()->GetXmax,0); 
     TLine* line = new TLine(hnew->GetXaxis()->GetXmin(),1,hnew->GetXaxis()->GetXmax(),1); 

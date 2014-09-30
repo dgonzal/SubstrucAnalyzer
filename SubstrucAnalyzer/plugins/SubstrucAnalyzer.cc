@@ -91,18 +91,22 @@ SubstrucAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       gentop_phi.push_back(iter->phi());
     }
   }
- 
-  
+
+  //cout<<"gentop size: "<<gentop_eta.size()<<endl;
+
   double deltaR_value = matching_radius_*matching_radius_;
 
-  //Number of Jets that are matched/unmatched or have a cmsTopTag
-  int top_counter = 0;
-  int top_matched_counter = 0;
-  int top_unmatched_counter = 0;
 
   for (unsigned int icoll = 0; icoll < jetLabels_.size(); ++icoll ) {
     edm::Handle<edm::View<reco::Jet>>  pfJetCollection;
    
+
+    //Number of Jets that are matched/unmatched or have a cmsTopTag
+    int top_counter = 0;
+    int top_matched_counter = 0;
+    int top_unmatched_counter = 0;
+
+
     bool ValidPFJets = iEvent.getByToken(jetTokens_[icoll], pfJetCollection );
     if(!ValidPFJets) continue;
     
@@ -124,7 +128,7 @@ SubstrucAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	reco::CATopJetProperties properties = helper(*basicjet);
 
 	//cmsTopTag cuts performed on any recontructed jet
-	if ( jet->numberOfDaughters() > 2 && properties.minMass>50 && properties.topMass<200&& properties.topMass > 140) {
+	if ( jet->numberOfDaughters() > 2 && properties.minMass>50 && properties.topMass<250&& properties.topMass > 140) {
 	  top_counter +=1;
 	  
 	  Topjet_pt[icoll]->Fill(jet->pt());
@@ -205,6 +209,13 @@ SubstrucAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }
     }
   }
+
+  gentop.clear();
+  gentop_eta.clear();
+  gentop_phi.clear();
+
+
+
 }
 
 

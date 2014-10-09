@@ -6,9 +6,13 @@
 //
 //
 
+//BOOST libs
+#include "boost/tuple/tuple.hpp"
+
 // system include files
 #include <memory>
 #include <string>
+#include <list>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -48,6 +52,8 @@
 //DataFormats 
 #include "SimDataFormats/CaloHit/interface/PCaloHit.h"
 #include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
+#include "DataFormats/HcalDetId/interface/HcalDetId.h"
+
 
 // ROOT
 #include "TH1F.h"
@@ -82,7 +88,7 @@ private:
 
 
 
-  TH1F* henergy_sum;
+  //TH1F* henergy_sum;
 
   TH1F* gen_energy;
   TH1F* gen_pT;
@@ -90,6 +96,11 @@ private:
   TH1F* eta_response;
   TH1F* phi_response;
   TH1F* energy_response;
+
+  TH1F* eb_energy;
+  TH1F* ee_energy;
+  TH1F* es_energy;
+  TH1F* h_energy;
 
   TH2F* scatter_dR_depth;
   TH2F* scatter_dR_pT;
@@ -104,11 +115,29 @@ private:
   TH2F* es_eta_hits;
   TH2F* hcal_eta_hits;
   
+  TH1F* eb_energy_response;
+  TH1F* ee_energy_response;
+  TH1F* es_energy_response;
+  TH1F* hcal_energy_response;
+  TH1F* hcal_weight_energy_response;
+  TH1F* hcal_detId_energy_response;
+  TH1F* ecal_detId_energy_response;
+
   TH2F* eb_pt_hits;
   TH2F* ee_pt_hits;
   TH2F* es_pt_hits;
   TH2F* hcal_pt_hits;
+  /*
+  TH2F* eb_pt_e;
+  TH2F* ee_pt_e;
+  TH2F* es_pt_e;
+  TH2F* hcal_pt_e;
+  */
+  TH2F* scatter_genpT_hitenergy;
+  TH2F* scatter_genenergy_hitenergy;
 
+  TH2F* scatter_genpT_energy;   
+  TH2F* scatter_genenergy_energy;
 
   TH2F* scatter_x_z;
   TH2F* scatter_y_z;

@@ -123,10 +123,17 @@ private:
   TH1F* hcal_detId_energy_response;
   TH1F* ecal_detId_energy_response;
 
+  TH2F* hcal_detId_genenergy;
+  TH2F* ecal_detId_genenergy;
+
+  TH1F* relativCalenergy;
+  TH2F* genenergy_relativCalenergy;
+
   TH2F* eb_pt_hits;
   TH2F* ee_pt_hits;
   TH2F* es_pt_hits;
   TH2F* hcal_pt_hits;
+
   /*
   TH2F* eb_pt_e;
   TH2F* ee_pt_e;
@@ -143,6 +150,8 @@ private:
   TH2F* scatter_y_z;
  
   TH3F* scatter_x_y_z; 
+
+  TH1F* barrel_9gev_energy;
 
 
   //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;

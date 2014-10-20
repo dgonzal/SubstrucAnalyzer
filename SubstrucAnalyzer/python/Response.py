@@ -10,9 +10,9 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.demo = cms.EDAnalyzer('SimHitResponse',
-                              ProducerModule = cms.string("famosSimHits"), #options at the moment "g4SimHits" or "famosSimHits"
+                              ProducerModule = cms.string("g4SimHits"), #options at the moment "g4SimHits" or "famosSimHits"
                               #HitLabel = cms.InputTag("HcalHits"),#HcalHits,EcalHitsEB
-                              OutputName = cms.string("4T_fast.root") 
+                              OutputName = cms.string("4T.root") 
                               
 )
 
@@ -37,19 +37,19 @@ fullsim = cms.untracked.vstring()
 fullsim.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/gensim.root'])
 
 Mag_0T = cms.untracked.vstring()
-Mag_0T.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/0T_gensim.root'])
+Mag_0T.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/0T_gensim.root'])
 
 Mag_0T_eta = cms.untracked.vstring()
 Mag_0T_eta.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/0T_eta_gensim.root'])
 
 Mag_4T = cms.untracked.vstring()
-Mag_4T.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/4T_gensim.root'])
+Mag_4T.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/4T_gensim.root'])
 
 Mag_4T_eta = cms.untracked.vstring()
 Mag_4T_eta.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/4T_eta_gensim.root'])
 
 test =  cms.untracked.vstring()
-test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/gensim.root'])
+test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/gensim.root'])
 
 
 
@@ -59,7 +59,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source ("PoolSource",fileNames = Mag_4T)
 
 process.p = cms.Path(process.demo)
-
 
 #write out all the trees in one file, was used for testing purposes
 #process.output_step = cms.EndPath(process.output)

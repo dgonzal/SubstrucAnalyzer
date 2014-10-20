@@ -2,7 +2,7 @@
 
 CXX      = g++ -std=c++11
 LINKER   = g++ -o
-Project = fast_full_comp
+Project = slicemacro
 
 scramtag = $(shell cd $$CMSSW_BASE; scram tool tag $(1) $(2))
 

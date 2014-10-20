@@ -327,12 +327,15 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   }
 
-  for(unsigned int m=0; m<ecal_energy_depo.size();++m)
+  for(unsigned int m=0; m<ecal_energy_depo.size();++m){
     ecal_detId_energy_response->Fill(ecal_energy_depo.at(m).energy);
+    ecal_detId_genenergy->Fill(GenParticles->at(0).energy(),ecal_energy_depo.at(m).energy);
+  }
 
-  for(unsigned int m=0; m<det_energy_depo.size();++m)
+  for(unsigned int m=0; m<det_energy_depo.size();++m){
     hcal_detId_energy_response->Fill(det_energy_depo.at(m).energy);
-  
+    hcal_detId_genenergy->Fill(GenParticles->at(0).energy(),det_energy_depo.at(m).energy);
+  }
 
   eb_eta_hits->Fill(GenParticles->at(0).eta(),ECALEBSimHits->size(),ecaleb_energy);
   ee_eta_hits->Fill(GenParticles->at(0).eta(),ECALEESimHits->size(),ecales_energy);
@@ -353,15 +356,19 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   scatter_genpT_energy->Fill(GenParticles->at(0).pt(),ecaleb_energy+ecalee_energy+ecales_energy+hcal_energy_weight);    
   scatter_genenergy_energy->Fill(GenParticles->at(0).energy(),(ecaleb_energy+ecalee_energy+ecales_energy+hcal_energy_weight-GenParticles->at(0).energy())/GenParticles->at(0).energy());    
   
+  relativCalenergy->Fill((ecaleb_energy+ecalee_energy+ecales_energy)/(ecaleb_energy+ecalee_energy+ecales_energy+hcal_energy_weight));	
+  genenergy_relativCalenergy->Fill(GenParticles->at(0).energy(),(ecaleb_energy+ecalee_energy+ecales_energy)/(ecaleb_energy+ecalee_energy+ecales_energy+hcal_energy_weight));
+
   scatter_eta_hits->Fill(GenParticles->at(0).eta(),ECALEBSimHits->size()+ECALEESimHits->size()+ECALESSimHits->size()+HCALSimHits->size(),hcal_energy_weight+ecaleb_energy+ecales_energy+ecalee_energy);
   scatter_pT_hits->Fill(GenParticles->at(0).pt(),ECALEBSimHits->size()+ECALEESimHits->size()+ECALESSimHits->size()+HCALSimHits->size(),hcal_energy_weight+ecaleb_energy+ecales_energy+ecalee_energy);
   scatter_pT_hitenergy->Fill(GenParticles->at(0).pt(),hcal_energy_weight+ecaleb_energy+ecales_energy+ecalee_energy);
   
 
-  std::cout<<"hcal energy "<<hcal_energy<< " ecal EB energy "<< ecaleb_energy<< " ecal ES energy "<< ecales_energy << " ecal EE energy "<< ecalee_energy << std::endl;
+  std::cout<<"hcal energy "<<hcal_energy<<" corrected "<<hcal_energy_weight<< " ecal EB energy "<< ecaleb_energy<< " ecal ES energy "<< ecales_energy << " ecal EE energy "<< ecalee_energy << std::endl;
 
   std::cout<<" max (x,y) "<<max_posX<<" "<<max_posY<<std::endl;
 
+  if(GenParticles->at(0).energy()>8 &&GenParticles->at(0).energy()<10)  barrel_9gev_energy->Fill(hcal_energy_weight+ecaleb_energy+ecales_energy+ecalee_energy);
 
   //henergy_sum->Fill(hcal_energy);
 
@@ -377,8 +384,14 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 // ------------ method called once each job just before starting event loop  ------------
 void SimHitResponse::beginJob(){
 
+
+  barrel_9gev_energy = new TH1F("barrel_9gev_energy","Energy 9GeV K+",50,0,20);
+
   gen_energy = new TH1F("gen_energy","Energy of Genparticles",50,0,25);
   gen_pT = new TH1F("gen_pT","pT of Genparticles",50,0,20);
+
+  relativCalenergy = new TH1F("relativCalenergy","relativ Energy in ECAL",300,0,1);
+  genenergy_relativCalenergy = new TH2F("genenergy_relativCalenergy","",150,0,20,300,0,1);
 
   eta_response = new TH1F("eta_response","#eta",50,-4,4);
   phi_response = new TH1F("phi_response","#phi",50,-4,4);
@@ -389,8 +402,11 @@ void SimHitResponse::beginJob(){
   es_energy_response = new TH1F("es_energy_response","E",150,0,2);
   hcal_energy_response = new TH1F("hcal_energy_response","E",150,0,2);
   hcal_weight_energy_response = new TH1F("hcal_weight_energy_response","E",150,0,2);
-  hcal_detId_energy_response = new TH1F("hcal_detId_energy_response","E",150,0,10);
-  ecal_detId_energy_response = new TH1F("ecal_detId_energy_response","E",150,0,5);
+  hcal_detId_energy_response = new TH1F("hcal_detId_energy_response","E",250,0,10);
+  ecal_detId_energy_response = new TH1F("ecal_detId_energy_response","E",250,0,10);
+
+  hcal_detId_genenergy = new TH2F("hcal_detId_genenergy","E_{DetId}, E_{gen}",150,0,20,250,0,10);
+  ecal_detId_genenergy = new TH2F("ecal_detId_genenergy","E_{DetId}, E_{gen}",150,0,20,250,0,10);
 
   eb_energy = new TH1F("eb_energy","E",100,0,40);
   ee_energy = new TH1F("ee_energy","E",100,0,1);
@@ -478,6 +494,16 @@ void SimHitResponse::endJob() {
 
   scatter_genpT_energy->Write();       
   scatter_genenergy_energy->Write();   
+
+
+  relativCalenergy->Write(); 
+  genenergy_relativCalenergy->Write();
+
+  barrel_9gev_energy->Write();
+
+
+  ecal_detId_genenergy->Write();
+  hcal_detId_genenergy->Write();
 
   delete f;
 

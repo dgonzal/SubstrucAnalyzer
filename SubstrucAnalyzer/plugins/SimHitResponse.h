@@ -13,6 +13,9 @@
 #include <memory>
 #include <string>
 #include <list>
+#include <vector>
+#include <sstream>
+#include <iostream>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -92,6 +95,9 @@ private:
 
   TH1F* gen_energy;
   TH1F* gen_pT;
+  TH1F* gen_eta;
+  TH1F* gen_phi;
+  TH1F* gen_pdgId;
 
   TH1F* eta_response;
   TH1F* phi_response;
@@ -126,6 +132,18 @@ private:
   TH2F* hcal_detId_genenergy;
   TH2F* ecal_detId_genenergy;
 
+  TH2F* ecal_detId_deltaR;
+  TH2F* hcal_detId_deltaR;
+
+  TH2F* hcal_detId_energy_deltaR;
+  TH2F* ecal_detId_energy_deltaR;
+
+  TH2F* ecal_detId_phi_eta;
+  TH2F* hcal_detId_phi_eta;
+
+  TH2F* ecal_detId_energy_Num;
+  TH2F* hcal_detId_energy_Num;
+
   TH1F* relativCalenergy;
   TH2F* genenergy_relativCalenergy;
 
@@ -151,9 +169,23 @@ private:
  
   TH3F* scatter_x_y_z; 
 
-  TH1F* barrel_9gev_energy;
+  TH1F* simhit_energy_response;
 
 
+  //single shower histograms
+
+  int count_events;
+
+  std::vector<TH2F*> vec_phi_eta;
+  std::vector<TH2F*> vec_delPhi_delEta;
+  std::vector<TH3F*> vec_x_y_z;
+  std::vector<TH2F*> vec_energy_delR;
+
+  //vector<TH1F*> vec_energy;
+  
+
+
+ 
   //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;

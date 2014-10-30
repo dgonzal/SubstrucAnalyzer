@@ -12,9 +12,12 @@ process.content = cms.EDAnalyzer("EventContentAnalyzer")
 process.demo = cms.EDAnalyzer('SimHitResponse',
                               ProducerModule = cms.string("g4SimHits"), #options at the moment "g4SimHits" or "famosSimHits"
                               #HitLabel = cms.InputTag("HcalHits"),#HcalHits,EcalHitsEB
-                              OutputName = cms.string("4T.root") 
+                              OutputName = cms.string("full_response.root") 
                               
 )
+
+
+
 
 process.output = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring( ('keep *')),
@@ -32,7 +35,6 @@ process.output = cms.OutputModule("PoolOutputModule",
 fastsim = cms.untracked.vstring()
 fastsim.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/gensim.root'])
 
-
 fullsim = cms.untracked.vstring()
 fullsim.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/gensim.root'])
 
@@ -49,16 +51,39 @@ Mag_4T_eta = cms.untracked.vstring()
 Mag_4T_eta.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/4T_eta_gensim.root'])
 
 test =  cms.untracked.vstring()
-test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/gensim.root'])
+test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/gensim.root'])
 
-
+hd2 =  cms.untracked.vstring()
+hd2.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/gensim_hd2_nocorrection_0_20.root'])
 
 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.source = cms.Source ("PoolSource",fileNames = Mag_4T)
+process.source = cms.Source ("PoolSource",fileNames = test)#Mag_0T)
 
 process.p = cms.Path(process.demo)
+
+"""
+process = cms.Process("test")
+
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.load("Configuration.StandardSequences.Geometry_cff")
+
+process.magn_4T = cms.EDAnalyzer('SimHitResponse',
+                              ProducerModule = cms.string("g4SimHits"), #options at the moment "g4SimHits" or "famosSimHits"
+                              #HitLabel = cms.InputTag("HcalHits"),#HcalHits,EcalHitsEB
+                              OutputName = cms.string("4T.root")
+
+)
+
+Mag_4T = cms.untracked.vstring()
+Mag_4T.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/4T_gensim.root'])
+
+
+process.source = cms.Source ("PoolSource",fileNames = Mag_4T)
+
+process.p = cms.Path(process.magn_4T)
+"""
 
 #write out all the trees in one file, was used for testing purposes
 #process.output_step = cms.EndPath(process.output)

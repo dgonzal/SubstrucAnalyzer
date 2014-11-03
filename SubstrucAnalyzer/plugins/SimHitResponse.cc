@@ -194,7 +194,7 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     pos = geo->getPosition(Hit.id());
     depth = sqrt(pos.x()*pos.x()+pos.y()*pos.y());
     
-    if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
+    //if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
 
     bool detId_flag =true;
     for(unsigned int m=0; m<ecal_energy_depo.size();++m){
@@ -236,7 +236,7 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     pos = geo->getPosition(Hit.id());
     depth = sqrt(pos.x()*pos.x()+pos.y()*pos.y());
     
-    if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
+    //if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
 
 
     bool detId_flag =true;
@@ -279,7 +279,7 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     pos = geo->getPosition(Hit.id());
     depth = sqrt(pos.x()*pos.x()+pos.y()*pos.y());
         
-    if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
+    //if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
 
 
     bool detId_flag =true;
@@ -330,7 +330,7 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(count_events==10)
       cout<<deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())<< " ? "<<bool(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5)<<endl;
     */
-    if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
+    //if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
 
 
     bool detId_flag =true;
@@ -479,7 +479,7 @@ void SimHitResponse::beginJob(){
   gen_phi = new TH1F("gen_phi","#phi of Genparticles",100,-3.14159265359,3.14159265359);
   gen_pdgId = new TH1F("gen_pdgId","PdgId of Genparticles",1001,-0.5,1000);
 
-  energy_response = new TH1F("energy_response","Energy Response",10000,0,3000);
+  energy_response = new TH1F("energy_response","Energy Response",15000,0,4000);
 
   relativCalenergy = new TH1F("relativCalenergy","relativ Energy in ECAL",300,0,1);
   genenergy_relativCalenergy = new TH2F("genenergy_relativCalenergy","",150,0,20,300,0,1);

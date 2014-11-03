@@ -3,6 +3,14 @@
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: GeneratorInterface/Pythia8Interface/Py8PtGun_tt_cfi --conditions auto:run2_mc --magField 38T_PostLS1 --geometry ECALHCAL --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 -s GEN,SIM -n 10 --eventcontent FEVTDEBUG --datatier GEN-SIM --fileout gensim.root
+import sys
+
+print 'Number of arguments:', len(sys.argv), 'arguments.'
+print 'Argument List:', str(sys.argv)
+
+#print sys.argv[3]
+
+
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('SIM')
@@ -14,10 +22,10 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 
-process.load('Configuration.Geometry.GeometryRecoECALHCAL_cff')
-process.load('Configuration.Geometry.GeometrySimECALHCAL_cff')
-#process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-#process.load('Configuration.Geometry.GeometrySimDB_cff')
+#process.load('Configuration.Geometry.GeometryRecoECALHCAL_cff')
+#process.load('Configuration.Geometry.GeometrySimECALHCAL_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.Geometry.GeometrySimDB_cff')
 
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 #process.load('Configuration.StandardSequences.MagneticField_0T_cff')
@@ -29,7 +37,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5000)
+    input = cms.untracked.int32(10000)
 )
 
 # Input source
@@ -52,7 +60,7 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
-    fileName = cms.untracked.string('gensim_response.root'),
+    fileName = cms.untracked.string('gensim_response_1gev.root'),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('GEN-SIM')
@@ -72,8 +80,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 process.generator = cms.EDProducer("FlatRandomEGunProducer",
     PGunParameters = cms.PSet(
-        MinE = cms.double(9.0),
-	MaxE = cms.double(9.0),
+        MinE = cms.double(sys.argv[2]),
+	MaxE = cms.double(sys.argv[2]),
 	MinEta = cms.double(0.4),
         MaxEta = cms.double(0.5),
 	MinPhi = cms.double(-3.14159265359),#-3.14159265359
@@ -91,7 +99,7 @@ process.generator = cms.EDProducer("FlatRandomEGunProducer",
 
 process.responseAnalyzer = cms.EDAnalyzer('SimHitResponse',
                               ProducerModule = cms.string("g4SimHits"), #options at the moment "g4SimHits" or "famosSimHits"
-                              OutputName = cms.string("response.root") 
+                              OutputName = cms.string("response_1gev.root") 
 )
 
 

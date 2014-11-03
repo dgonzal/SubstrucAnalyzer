@@ -10,9 +10,9 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.demo = cms.EDAnalyzer('SimHitResponse',
-                              ProducerModule = cms.string("g4SimHits"), #options at the moment "g4SimHits" or "famosSimHits"
+                              ProducerModule = cms.string("famosSimHits"), #options at the moment "g4SimHits" or "famosSimHits"
                               #HitLabel = cms.InputTag("HcalHits"),#HcalHits,EcalHitsEB
-                              OutputName = cms.string("full_response.root") 
+                              OutputName = cms.string("kaon_9GeV_response.root") 
                               
 )
 
@@ -51,10 +51,12 @@ Mag_4T_eta = cms.untracked.vstring()
 Mag_4T_eta.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/4T_eta_gensim.root'])
 
 test =  cms.untracked.vstring()
-test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/full/gensim.root'])
+test.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/Kaon_9GeV_eta04_05.root'])
 
 hd2 =  cms.untracked.vstring()
 hd2.extend( ['file:/nfs/dust/cms/user/gonvaq/CMSSW/CMSSW_7_2_0_pre4/src/GeneratorInterface/Pythia8Interface/fast/gensim_hd2_nocorrection_0_20.root'])
+
+
 
 
 

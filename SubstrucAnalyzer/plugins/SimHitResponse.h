@@ -86,6 +86,8 @@ private:
 
   edm::EDGetTokenT<edm::PCaloHitContainer> ECAL_Hits_Label_;
   edm::EDGetTokenT<edm::PCaloHitContainer> Hits_Label_;
+
+  std::vector<double> ResponseBinning_;
   std::string OutputName_; 
   std::string Module_;
 

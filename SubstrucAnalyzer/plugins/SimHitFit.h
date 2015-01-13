@@ -16,6 +16,9 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cmath>
+#include <cfloat>
+
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -63,7 +66,7 @@
 #include "TH2F.h"
 #include "TH3F.h"
 #include "TFile.h"
-
+#include "TTree.h"
 
 
 //
@@ -91,19 +94,15 @@ private:
   std::string OutputName_; 
   std::string Module_;
 
-
+  TFile *f;
+  TTree* tree;
+  double eta_gen, phi_gen, e_ecal, e_hcal, e_calo;
+  double eEM_calo, eHad_calo;
 
   //TH1F* henergy_sum;
 
-  TH1F* gen_energy;
-  TH1F* gen_pT;
-  TH1F* gen_eta;
-  TH1F* gen_phi;
-  TH1F* gen_pdgId;
-
-  TH1F* eta_response;
-  TH1F* phi_response;
-  TH1F* energy_response;
+  TH1F* gen_energy, *gen_pT, *gen_eta, *gen_phi, *gen_pdgId;
+  TH1F* eta_response, *phi_response, *energy_response;
 
   TH1F* ecal_energy_response;
   TH1F* hcal_energy_response;
@@ -117,12 +116,21 @@ private:
   TH1F* relativCalenergy;
   TH2F* genenergy_relativCalenergy;
 
-
   TH3F* scatter_x_y_z; 
 
   TH1F* simhit_energy_response;
  
- 
+  TH1F* HitEnergyEM, *TotalEnergyEM, *hcal_detId_EnergyEM, *ecal_detId_EnergyEM;
+  TH1F* TotalEnergyHad;
+  TH1F* CaloTime, *ecalTime, *hcalTime;
+  TH1F* CaloTime_Eweight, *ecalTime_Eweight, *hcalTime_Eweight;
+  TH1F* CaloDepth, *ecalDepth, *hcalDepth;
+  
+  TH1F* ratioEcalHcal_energy;
+  TH1F* ratioEMTotal_energy;
+
+
+   
   //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;

@@ -50,8 +50,12 @@ SimHitResponse::SimHitResponse(const edm::ParameterSet& ps)
 
   Module_ = ps.getParameter<string>("ProducerModule");
   OutputName_ = ps.getParameter<string>("OutputName");
+  
+  ResponseBinning_ = ps.getParameter<vector<double>>("ResponseBinning");
   //Hits_Label_ = consumes<edm::PCaloHitContainer>(ps.getParameter<edm::InputTag>("HitLabel"));
   //ECAL_Hits_Label_ = consumes<edm::PCaloHitContainer>(ps.getParameter<edm::InputTag>("ECALHitLabel"));
+  
+
 
 }
 
@@ -465,6 +469,14 @@ SimHitResponse::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if(ECALESSimHits->size()>0)es_energy->Fill(ecales_energy);
   if(HCALSimHits->size()>0)h_energy->Fill(hcal_energy);
 
+  delete phi_eta_vec;
+  delete delPhi_delEta_vec; 
+  delete energy_delR_vec;
+  delete x_y_z_vec; 
+
+
+
+
 
 }
 
@@ -479,7 +491,7 @@ void SimHitResponse::beginJob(){
   gen_phi = new TH1F("gen_phi","#phi of Genparticles",100,-3.14159265359,3.14159265359);
   gen_pdgId = new TH1F("gen_pdgId","PdgId of Genparticles",1001,-0.5,1000);
 
-  energy_response = new TH1F("energy_response","Energy Response",15000,0,4000);
+  energy_response = new TH1F("energy_response","Energy Response",ResponseBinning_[0],ResponseBinning_[1],ResponseBinning_[2]);
 
   relativCalenergy = new TH1F("relativCalenergy","relativ Energy in ECAL",300,0,1);
   genenergy_relativCalenergy = new TH2F("genenergy_relativCalenergy","",150,0,20,300,0,1);
@@ -629,7 +641,7 @@ void SimHitResponse::endJob() {
 
 
   //std::cout<< vec_phi_eta.size()<<std::endl;
-
+  /*
   //single shower
   for(unsigned int i = 0; i< vec_phi_eta.size() &&vec_phi_eta.size()>0 ;i++){
     stringstream dir_name;
@@ -642,7 +654,7 @@ void SimHitResponse::endJob() {
     vec_x_y_z[i]->Write();
     vec_energy_delR[i]->Write();
   }
-
+  */
   delete f;
 
 }

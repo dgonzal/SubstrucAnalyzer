@@ -36,6 +36,9 @@ using namespace reco;
 struct sub_det{
   unsigned int detId;
   double energy;
+  double time_energy;
+  double entries;
+  double EMenergy;
 };
 
 
@@ -77,7 +80,10 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			      210.55, 197.93, 186.12, 189.64, 
 			      189.63, 190.28, 189.61, 189.6, 
 			      190.12, 191.22, 190.9, 193.06, 
-			      188.42, 188.42};
+			      188.42, 188.42, 0.383, 0.368,
+			      231.0, 231.0, 231.0, 231.0, 360.0,
+			      360.0, 360.0, 360.0, 360.0, 360.0,
+			      360.0, 360.0, 360.0, 360.0, 360.0};
 
   
   edm::Handle<reco::GenParticleCollection> GenParticles;
@@ -114,7 +120,9 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   const CaloGeometry* geo = pG.product();
 
   double hcal_energy  = 0;
-  double ecal_energy =0;
+  double ecal_energy = 0;
+  double EMenergy = 0;
+  double Hadenergy = 0;
 
   PCaloHit Hit;
   GlobalPoint pos;
@@ -131,19 +139,35 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       Hit = SimHits->at(m);
       pos = geo->getPosition(Hit.id());
 
+      CaloDepth->Fill(Hit.depth());
+      //if(deltaR(pos.eta(),pos.phi(),GenParticles->at(0).eta(),GenParticles->at(0).phi())>0.5) continue;
+      
+      
+
+      if(std::isnan(Hit.energy()) || std::isinf(Hit.energy()))continue;
+      cout<<"type: "<< p <<" Hit Energy: "<< Hit.energy()<<" Hit depth: "<<Hit.depth()<< " Hit time: "<<Hit.time()<<endl;
+
+
       double sampling_weight = 1;
 
       if(p==3){
 	HcalDetId hcalId(Hit.id());
 	sampling_weight = samplingFactors[hcalId.ietaAbs()-1];
 	hcal_energy_response->Fill(Hit.energy()*sampling_weight);
- 
+	hcalDepth->Fill(Hit.depth());
+	HitEnergyEM->Fill(Hit.energyEM()*sampling_weight);
+
 	hcal_energy += Hit.energy()*sampling_weight;
+	EMenergy+= Hit.energyEM()*sampling_weight;
+	Hadenergy+= Hit.energyHad()*sampling_weight;
 
 	bool detId_flag =true;
 	for(unsigned int m=0; m<hcal_energy_depo.size();++m){
 	  if(hcal_energy_depo.at(m).detId == Hit.id()){
-	    hcal_energy_depo.at(m).energy+= Hit.energy();
+	    hcal_energy_depo.at(m).energy += Hit.energy();
+	    hcal_energy_depo.at(m).time_energy += Hit.time()*Hit.energy();
+	    hcal_energy_depo.at(m).entries +=1;
+	    hcal_energy_depo.at(m).EMenergy += Hit.energyEM();
 	    detId_flag = false;
 	  }
 	}
@@ -151,18 +175,27 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  sub_det det_part;
 	  det_part.detId = Hit.id();
 	  det_part.energy = Hit.energy();
+	  det_part.time_energy = Hit.time()*Hit.energy();
+	  det_part.entries = 1;
+	  det_part.EMenergy = Hit.energyEM();
 	  hcal_energy_depo.push_back(det_part);
 	}
       } 
       else{
 	ecal_energy += Hit.energy()*sampling_weight;
+	EMenergy+= Hit.energyEM()*sampling_weight;
+	Hadenergy+= Hit.energyHad()*sampling_weight;
 	ecal_energy_response->Fill(Hit.energy()*sampling_weight);
-
-
+	ecalDepth->Fill(Hit.depth());
+	HitEnergyEM->Fill(Hit.energyEM()*sampling_weight);
+	
 	bool detId_flag =true;
 	for(unsigned int m=0; m<ecal_energy_depo.size();++m){
 	  if(ecal_energy_depo.at(m).detId == Hit.id()){
-	    ecal_energy_depo.at(m).energy+= Hit.energy();
+	    ecal_energy_depo.at(m).energy += Hit.energy();
+	    ecal_energy_depo.at(m).time_energy += Hit.time()*Hit.energy();
+	    ecal_energy_depo.at(m).entries +=1;
+	    ecal_energy_depo.at(m).EMenergy += Hit.energyEM();
 	    detId_flag = false;
 	  }
 	}
@@ -170,32 +203,72 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  sub_det det_part;
 	  det_part.detId = Hit.id();
 	  det_part.energy = Hit.energy();
+	  det_part.time_energy = Hit.time()*Hit.energy();
+	  det_part.entries = 1;
+	  det_part.EMenergy = Hit.energyEM();
 	  ecal_energy_depo.push_back(det_part);
 	}
-
       }
-     
+    
       eta_response->Fill(pos.eta());
       phi_response->Fill(pos.phi());
       simhit_energy_response->Fill(Hit.energy()*sampling_weight);
-    
+      scatter_x_y_z->Fill(pos.x(),pos.y(),pos.z());
     }
   }
   
   for(unsigned int m=0; m<ecal_energy_depo.size();++m){
     ecal_detId_energy_response->Fill(ecal_energy_depo.at(m).energy);
     ecal_detId_genenergy->Fill(GenParticles->at(0).energy(),ecal_energy_depo.at(m).energy);
+   
+    if(ecal_energy_depo.at(m).energy>0.){
+      cout<<"ecal time energy: "<<ecal_energy_depo.at(m).time_energy<<" energy: "<<ecal_energy_depo.at(m).energy<<" average time: "<<ecal_energy_depo.at(m).time_energy/ecal_energy_depo.at(m).energy<<endl;
+      ecal_detId_EnergyEM->Fill(ecal_energy_depo.at(m).EMenergy);
+
+      ecalTime->Fill(ecal_energy_depo.at(m).time_energy/ecal_energy_depo.at(m).energy/ecal_energy_depo.at(m).entries);
+      CaloTime->Fill(ecal_energy_depo.at(m).time_energy/ecal_energy_depo.at(m).energy/ecal_energy_depo.at(m).entries);
+
+      ecalTime_Eweight->Fill(ecal_energy_depo.at(m).time_energy/ecal_energy_depo.at(m).energy,ecal_energy_depo.at(m).energy);
+      CaloTime_Eweight->Fill(ecal_energy_depo.at(m).time_energy/ecal_energy_depo.at(m).energy,ecal_energy_depo.at(m).energy);
+
+    }
   }
  
   for(unsigned int m=0; m<hcal_energy_depo.size();++m){
     hcal_detId_energy_response->Fill(hcal_energy_depo.at(m).energy);
     hcal_detId_genenergy->Fill(GenParticles->at(0).energy(),hcal_energy_depo.at(m).energy);
+    
+    if(hcal_energy_depo.at(m).energy>0.){
+      cout<<"hcal time energy: "<<hcal_energy_depo.at(m).time_energy<<" energy: "<<hcal_energy_depo.at(m).energy<<" average time: "<<hcal_energy_depo.at(m).time_energy/hcal_energy_depo.at(m).energy<<endl;
+
+      if(hcal_energy_depo.at(m).energy!=hcal_energy_depo.at(m).energy) assert(0==1);
+      hcal_detId_EnergyEM->Fill(hcal_energy_depo.at(m).EMenergy);
+
+      hcalTime->Fill(hcal_energy_depo.at(m).time_energy/hcal_energy_depo.at(m).energy);
+      CaloTime->Fill(hcal_energy_depo.at(m).time_energy/hcal_energy_depo.at(m).energy);
+
+      hcalTime_Eweight->Fill(hcal_energy_depo.at(m).time_energy/hcal_energy_depo.at(m).energy,hcal_energy_depo.at(m).energy);
+      CaloTime_Eweight->Fill(hcal_energy_depo.at(m).time_energy/hcal_energy_depo.at(m).energy,hcal_energy_depo.at(m).energy);
+
+
+
+    }
   }
 
-  relativCalenergy->Fill((ecal_energy)/(ecal_energy+hcal_energy));	
+  relativCalenergy->Fill(ecal_energy/(ecal_energy+hcal_energy));	
+  ratioEcalHcal_energy->Fill(ecal_energy/hcal_energy);
+  ratioEMTotal_energy->Fill(EMenergy/(ecal_energy+hcal_energy));
   genenergy_relativCalenergy->Fill(GenParticles->at(0).energy(),(ecal_energy)/(ecal_energy+hcal_energy));
   
   energy_response->Fill(hcal_energy+ecal_energy);
+
+  TotalEnergyEM->Fill(EMenergy);
+  TotalEnergyHad->Fill(Hadenergy);
+
+  eta_gen=GenParticles->at(0).eta();  phi_gen = GenParticles->at(0).phi(); e_ecal=ecal_energy ; e_hcal=hcal_energy ; e_calo=hcal_energy +ecal_energy ;
+  eEM_calo = EMenergy; eHad_calo = Hadenergy;
+  tree->Fill();
+
 }
 
 
@@ -228,12 +301,48 @@ void SimHitFit::beginJob(){
 
  
   scatter_x_y_z = new TH3F("scatter_x_y_z","",150,-500,500,150,-500,500,150,-800,800);
+
+  //----
+  HitEnergyEM = new TH1F("hit_energy_em","EM Energy of Hits",150,0,8);
+  TotalEnergyEM = new TH1F("energy_em","EM Energy",ResponseBinning_[0],ResponseBinning_[1],ResponseBinning_[2]);
+  TotalEnergyHad = new TH1F("energy_had","Hadronic Energy",ResponseBinning_[0],ResponseBinning_[1],ResponseBinning_[2]);
+  hcal_detId_EnergyEM = new TH1F("hcal_detId_EnergyEM","hcal EnergyEM per detId",150,0,6);
+  ecal_detId_EnergyEM = new TH1F("ecal_detId_EnergyEM","ecal EnergyEM per detId",150,0,6);
+ 
+  CaloTime = new TH1F("calo_time","Time in the Calorimeter",250,0,150);
+  ecalTime = new TH1F("ecal_time","Time in ECAL",250,0,150);
+  hcalTime = new TH1F("hcal_time","Time in HCAL",250,0,150);
+
+  CaloTime_Eweight = new TH1F("calo_time_eweight","Time Energy weight in the Calorimeter",250,0,150);
+  ecalTime_Eweight = new TH1F("ecal_time_eweight","Time Energy weight in ECAL",250,0,150);
+  hcalTime_Eweight = new TH1F("hcal_time_eweight","Time Energy weight in HCAL",250,0,150);
+
+  CaloDepth = new TH1F("calo_depth","Calorimeter Depth",100,-.05,99.5);
+  ecalDepth = new TH1F("ecal_depth","ECAL Depth",100,-.05,99.5);
+  hcalDepth = new TH1F("hcal_depth","HCAL Depth",100,-.05,99.5);
+  
+  ratioEcalHcal_energy = new TH1F("ratioEcalHcal_energy","ratio Ecal/Hcal Energy",100,0,10);
+  ratioEMTotal_energy = new TH1F("ratioEMTotal_energy","ratio EM Energy",100,0,2);
+  //----
+
+  f = new TFile(OutputName_.c_str(),"RECREATE");
+  tree = new TTree("Total", "Energy Calorimeter info");
+  tree->Branch("eta",&eta_gen,"eta_gen/D");
+  tree->Branch("phi",&phi_gen,"phi_gen/D");
+  tree->Branch("e_ecal",&e_ecal,"e_ecal/D");
+  tree->Branch("e_hcal",&e_hcal,"e_hcal/D");
+  tree->Branch("e_calo",&e_calo,"e_calo/D");
+  tree->Branch("eEM_calo",&eEM_calo,"eEM_calo/D");
+  tree->Branch("eHad_calo",&eHad_calo,"eHad_calo/D");
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void SimHitFit::endJob() {
 
-  TFile *f = new TFile(OutputName_.c_str(),"recreate");
+  f->cd();
+
+  tree->Write();
+
   gen_energy->Write();
   gen_pT->Write();
   gen_eta->Write();
@@ -259,6 +368,29 @@ void SimHitFit::endJob() {
 
   energy_response->Write();
 
+  //----
+  HitEnergyEM->Write(); 
+  TotalEnergyEM->Write(); 
+  TotalEnergyHad->Write(); 
+  hcal_detId_EnergyEM->Write();
+  ecal_detId_EnergyEM->Write(); 
+ 
+  CaloTime->Write();
+  ecalTime->Write(); 
+  hcalTime->Write();
+
+  CaloTime_Eweight->Write();
+  ecalTime_Eweight->Write(); 
+  hcalTime_Eweight->Write();
+
+  CaloDepth->Write(); 
+  ecalDepth->Write();
+  hcalDepth->Write(); 
+  
+  ratioEcalHcal_energy->Write(); 
+  ratioEMTotal_energy->Write();
+
+  //---
   delete f;
 
 }

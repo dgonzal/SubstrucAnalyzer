@@ -16,7 +16,7 @@ deltaEta = 0.1
 
 histoBinning = [5000,0,500]
 
-string = "newNucs2_"
+string = ""
 
 
 # 2. Now the grid-control interface: let grid-control replace some special variables and transform them into the global ones we just defined above.

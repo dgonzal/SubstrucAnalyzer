@@ -84,17 +84,17 @@ SimHitFit::~SimHitFit()
 void
 SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  double samplingFactors[] = {125.44, 125.54, 125.32, 125.13, 
-			      124.46, 125.01, 125.22, 125.48, 
-			      124.45, 125.9, 125.83, 127.01, 
-			      126.82, 129.73, 131.83, 143.52,
-			      210.55, 197.93, 186.12, 189.64, 
-			      189.63, 190.28, 189.61, 189.6, 
-			      190.12, 191.22, 190.9, 193.06, 
-			      188.42, 188.42, 0.383, 0.368,
-			      231.0, 231.0, 231.0, 231.0, 360.0,
-			      360.0, 360.0, 360.0, 360.0, 360.0,
-			      360.0, 360.0, 360.0, 360.0, 360.0};
+  vector<double> samplingFactors = {125.44, 125.54, 125.32, 125.13, 
+				    124.46, 125.01, 125.22, 125.48, 
+				    124.45, 125.9, 125.83, 127.01, 
+				    126.82, 129.73, 131.83, 143.52,
+				    210.55, 197.93, 186.12, 189.64, 
+				    189.63, 190.28, 189.61, 189.6, 
+				    190.12, 191.22, 190.9, 193.06, 
+				    188.42, 188.42, 0.383, 0.368,
+				    231.0, 231.0, 231.0, 231.0, 360.0,
+				    360.0, 360.0, 360.0, 360.0, 360.0,
+				    360.0, 360.0, 360.0, 360.0, 360.0};
 
   
   edm::Handle<reco::GenParticleCollection> GenParticles;
@@ -155,7 +155,13 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       
 
-      if(std::isnan(Hit.energy()) || std::isinf(Hit.energy()))continue;
+      if(std::isnan(Hit.energy()) || std::isinf(Hit.energy())){
+	if(std::isnan(Hit.energy())) cout<<" Hit is Nan"<<endl;
+	if(std::isinf(Hit.energy())) cout<<" Hit is Inf"<<endl;
+	//assert(1==0);
+	//continue;
+      }
+
       //cout<<"type: "<< p <<" Hit Energy: "<< Hit.energy()<<" Hit depth: "<<Hit.depth()<< " Hit time: "<<Hit.time()<<endl;
 
 
@@ -163,6 +169,14 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       if(p==3){
 	HcalDetId hcalId(Hit.id());
+	if(hcalId.ietaAbs()<0) {
+	  cout<<"negativ ietaAbs"<<endl;
+	  //assert(0==1);
+	}
+	if(samplingFactors.size() < abs(hcalId.ietaAbs())){
+	  cout<<"sampling Factor not covering the ietaAbs"<<endl;
+	  //assert(0==1);
+	}
 	sampling_weight = samplingFactors[hcalId.ietaAbs()-1];
 	hcal_energy_response->Fill(Hit.energy()*sampling_weight);
 	hcalDepth->Fill(Hit.depth());
@@ -281,6 +295,11 @@ SimHitFit::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   eta_gen=GenParticles->at(0).eta();  phi_gen = GenParticles->at(0).phi(); e_ecal=ecal_energy ; e_hcal=hcal_energy ; e_calo=hcal_energy +ecal_energy ;
   eEM_calo = EMenergy; eHad_calo = Hadenergy;
+
+  if(e_calo>200){
+    cout<<"too high energy"<<endl;
+    //assert(0==1);
+  }
   tree->Fill();
 
 }
@@ -356,6 +375,7 @@ void SimHitFit::endJob() {
   f->cd();
 
   tree->Write();
+
 
   gen_energy->Write();
   gen_pT->Write();
